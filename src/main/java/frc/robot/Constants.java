@@ -16,4 +16,11 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
+  public static class CANIDs {
+    public static final int kElevator1ID = 13;
+    public static final int kElevator2ID = 12;
+    public static final int kManipulatorID = 14;
+    public static final int kLaserCANID = 15;
+  }
 }

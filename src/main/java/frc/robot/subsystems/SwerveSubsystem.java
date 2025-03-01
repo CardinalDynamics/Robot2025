@@ -30,15 +30,16 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveDrive swerveDrive;
     RobotConfig config;
     AHRS navx;
-
+    Boolean isRobotOriented = false;
     
     public SwerveSubsystem(File directory) {
 
-        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.POSE;
 
         // Make a swerve drive from json files
         try {
-            swerveDrive = new SwerveParser(directory).createSwerveDrive(Units.feetToMeters(4.5));
+            swerveDrive = new SwerveParser(directory).createSwerveDrive(Units.feetToMeters(4.5),
+                new Pose2d(new Translation2d(), new Rotation2d(Math.toDegrees(0))));
             
         } catch(Exception e) {
             SmartDashboard.putString("error", e.getMessage());
@@ -52,9 +53,7 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         navx = (AHRS)swerveDrive.getGyro().getIMU();
-        navx.reset();
-        swerveDrive.setGyroOffset(new Rotation3d(0, 0, Math.toRadians(90)));
-        // swerveDrive.resetOdometry(new Pose2d());
+        
 
         AutoBuilder.configure(
             this::getPose, // Robot pose supplier
@@ -62,7 +61,7 @@ public class SwerveSubsystem extends SubsystemBase {
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(0.001, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(0.1, 0.0, 0.0), // Translation PID constants
                     new PIDConstants(0.001, 0.0, 0.0) // Rotation PID constants
             ),
             config, // The robot configuration
@@ -89,6 +88,30 @@ public class SwerveSubsystem extends SubsystemBase {
             false);
     }
 
+    public void driveSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5,
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .5,
+            true,
+            false);
+    }
+
+    public void driveRobotOriented(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(),
+            false,
+            false);
+    }
+
+    public void driveRobotOrientedSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5,
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .5,
+            false,
+            false);
+    }
+
     public Pose2d getPose() {
         return swerveDrive.getPose();
     }
@@ -105,9 +128,24 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.drive(speeds);
     }
 
+    public void toggleDriveMode() {
+        isRobotOriented = !isRobotOriented;
+    }
+
+    public boolean getDriveMode() {
+        return isRobotOriented;
+    }
+
+    public void zeroGyro() {
+        swerveDrive.zeroGyro();
+    }
+
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("yaw", navx.getYaw());
+        SmartDashboard.putNumber("yaw", Math.toDegrees(swerveDrive.getGyroRotation3d().getAngle()));
+        SmartDashboard.putNumber("autobuilderpose", AutoBuilder.getCurrentPose().getRotation().getDegrees());
+        SmartDashboard.putNumber("swerveDrive pose", swerveDrive.getPose().getRotation().getDegrees());
+        SmartDashboard.putBoolean("robot oriented", getDriveMode());
         // TODO Auto-generated method stub
         super.periodic();
     }

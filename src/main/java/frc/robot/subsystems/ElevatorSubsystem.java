@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import frc.robot.Constants.CANIDs;
+import frc.robot.Constants.CANIDs.*;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -7,35 +9,44 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
     SparkMax elevator1;
     SparkMax elevator2;
     ProfiledPIDController controller;
-    // PIDController controller;
-    DutyCycleEncoder encoder;
+    Encoder encoder;
     double targetPosition;
     SparkMaxConfig elevator1Config = new SparkMaxConfig();
     SparkMaxConfig elevator2Config = new SparkMaxConfig();
+    ElevatorFeedforward feedforward = new ElevatorFeedforward(0, 0.15, 0);
+
+    public final double kL2SETPOINT = 2475.0;
+    public final double kL3SETPOINT = 5250.0;
+    public final double kL4SETPOINT = 9600.0;
 
 
     public ElevatorSubsystem () {
-        elevator1 = new SparkMax(1, MotorType.kBrushless);
-        elevator2 = new SparkMax(2, MotorType.kBrushless);
+        elevator1 = new SparkMax(CANIDs.kElevator1ID, MotorType.kBrushless);
+        elevator2 = new SparkMax(CANIDs.kElevator2ID, MotorType.kBrushless);
 
-        elevator1Config.inverted(false).idleMode(IdleMode.kBrake);
-        elevator2Config.inverted(true).idleMode(IdleMode.kBrake);
+        elevator1Config.inverted(true).idleMode(IdleMode.kBrake);
+        elevator2Config.inverted(false).idleMode(IdleMode.kBrake);
 
         elevator1.configure(elevator1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         elevator2.configure(elevator2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        controller = new ProfiledPIDController(0, 0, 0, null);
+        controller = new ProfiledPIDController(0.025, 0.0, 0.0, new Constraints(6000.0, 6000.0));
 
-        encoder = new DutyCycleEncoder(0, 1.0, 0);
+        encoder = new Encoder(0, 1, false);
+        encoder.reset();
 
         targetPosition = 0.0;
 
@@ -44,7 +55,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public double getElevatorPosition() {
-        return encoder.get();
+        return encoder.getDistance();
+    }
+
+    public double getElevatorRate() {
+        return encoder.getRate();
     }
 
     public void setVolts(double volts) {
@@ -59,8 +74,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void usePIDOutput() {
-        elevator1.setVoltage(controller.calculate(getElevatorPosition()));
-        elevator2.setVoltage(controller.calculate(getElevatorPosition()));
+        elevator1.setVoltage(controller.calculate(getElevatorPosition()) + feedforward.calculate(0));
+        elevator2.setVoltage(controller.calculate(getElevatorPosition()) + feedforward.calculate(0));
     }
 
     public void periodic() {
