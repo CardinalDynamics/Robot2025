@@ -5,18 +5,29 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.VariableAutos.BranchSide;
+import frc.robot.commands.IntakeCoral;
+import frc.robot.commands.IntakeSlow;
+import frc.robot.commands.ScoreL4;
+import frc.robot.commands.ScoreL4WithSensor;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.FunnelSubsystem;
 import frc.robot.subsystems.ManipulatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import java.io.File;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -31,21 +42,46 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  SwerveSubsystem swerver = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+  SwerveSubsystem swerver;
   ElevatorSubsystem elevator = new ElevatorSubsystem();
   ManipulatorSubsystem manipulator = new ManipulatorSubsystem();
+  FunnelSubsystem funnel = new FunnelSubsystem();
+  ClimberSubsystem climber = new ClimberSubsystem();
   PathPlannerPath path;
-  Trigger robotOriented = new Trigger(swerver::getDriveMode);
+  Trigger robotOriented;
+  AutoAlign alignmentCommandFactory;
+  private Field2d m_field = new Field2d();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
   
     private final CommandXboxController m_operatorController =
       new CommandXboxController(1);
+
+  public final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    NamedCommands.registerCommand("intake coral", new IntakeSlow(manipulator).withTimeout(.7));
+    NamedCommands.registerCommand("score L4", new ScoreL4WithSensor(manipulator, elevator));
+    swerver = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+    robotOriented = new Trigger(swerver::getDriveMode);
     // Load path
     loadPaths();
+
+    SmartDashboard.putData("Field", m_field);
+
+    m_autoChooser.setDefaultOption("Leave", AutoBuilder.buildAuto("Start2-Leave"));
+    m_autoChooser.addOption("Left 3 Coral", AutoBuilder.buildAuto("Start1-test"));
+    m_autoChooser.addOption("Right 3 Coral", AutoBuilder.buildAuto("Start3-test"));
+    m_autoChooser.addOption("Barge Wall 3 Coral", AutoBuilder.buildAuto("Start0-test"));
+    m_autoChooser.addOption("Processor Wall 3 Coral", AutoBuilder.buildAuto("Start5-test"));
+    m_autoChooser.addOption("straight 1 coral", AutoBuilder.buildAuto("Start2-score"));
+    m_autoChooser.addOption("scorel4-test", AutoBuilder.buildAuto("L4Score-test"));
+    m_autoChooser.addOption("none", Commands.waitSeconds(0));
+    SmartDashboard.putData("chooser", m_autoChooser);
+
+    alignmentCommandFactory = new AutoAlign(swerver);
     // Configure the trigger bindings
     configureBindings();
   }
@@ -63,6 +99,9 @@ public class RobotContainer {
 
     elevator.setDefaultCommand(Commands.run(() -> elevator.setVolts(0), elevator));
     manipulator.setDefaultCommand(Commands.run(() -> manipulator.setManipulatorVoltage(0), manipulator));
+    climber.setDefaultCommand(Commands.run(() -> climber.setWinchVoltage(
+      11.0 * MathUtil.applyDeadband(m_operatorController.getLeftY(), .7)), climber));
+    funnel.setDefaultCommand(Commands.run(() -> funnel.setFunnelVoltage(0), funnel));
 
     swerver.setDefaultCommand(Commands.run(() -> swerver.drive(
       () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
@@ -87,14 +126,17 @@ public class RobotContainer {
       () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
       () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
 
-    m_driverController.y().whileTrue(AutoBuilder.followPath(path));
+    // m_driverController.y().whileTrue(AutoBuilder.followPath(path));
+
+    m_driverController.x().whileTrue(alignmentCommandFactory.generateCommand(BranchSide.LEFT));
+    m_driverController.b().whileTrue(alignmentCommandFactory.generateCommand(BranchSide.RIGHT));
 
     
     m_operatorController.rightBumper().whileTrue(Commands.run(() -> elevator.setVolts(2), elevator));
     m_operatorController.leftBumper().whileTrue(Commands.run(() -> elevator.setVolts(-2), elevator));
 
     m_operatorController.rightTrigger().whileTrue(Commands.run(() -> manipulator.setManipulatorVoltage(
-      MathUtil.applyDeadband(m_operatorController.getRightTriggerAxis(), .1) * 12.0), manipulator));
+      MathUtil.applyDeadband(m_operatorController.getRightTriggerAxis(), .02) * 4.0), manipulator));
     
     m_operatorController.leftTrigger().whileTrue(Commands.run(() -> manipulator.setManipulatorVoltage(-2), manipulator));
 
@@ -107,8 +149,13 @@ public class RobotContainer {
     m_operatorController.b().onTrue(Commands.runOnce(() -> elevator.setTargetPosition(elevator.kL4SETPOINT)));
     m_operatorController.b().whileTrue(Commands.run(() -> elevator.usePIDOutput(), elevator));
 
-    m_operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetPosition(0)));
+    m_operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetPosition(5.0)));
     m_operatorController.a().whileTrue(Commands.run(() -> elevator.usePIDOutput(), elevator));
+
+    m_operatorController.povDown().onTrue(new IntakeCoral(manipulator));
+    // m_operatorController.leftBumper().whileTrue(Commands.run(() -> climber.setClimberVoltage(-6), climber)).onFalse(Commands.runOnce(() -> climber.setClimberVoltage(0), climber));
+    m_operatorController.povRight().whileTrue(Commands.run(() -> funnel.setFunnelVoltage(-4), funnel));
+    m_operatorController.povLeft().whileTrue(Commands.run(() -> funnel.setFunnelVoltage(6), funnel));
 
   }
 
@@ -127,6 +174,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new WaitCommand(1);
+    return m_autoChooser.getSelected();
   }
 }

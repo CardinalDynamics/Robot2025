@@ -12,6 +12,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -19,8 +20,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
@@ -35,10 +38,13 @@ public class SwerveSubsystem extends SubsystemBase {
     public SwerveSubsystem(File directory) {
 
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.POSE;
+        
+        int[] validIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22};
+        LimelightHelpers.SetFiducialIDFiltersOverride("limelight", validIDs);
 
         // Make a swerve drive from json files
         try {
-            swerveDrive = new SwerveParser(directory).createSwerveDrive(Units.feetToMeters(4.5),
+            swerveDrive = new SwerveParser(directory).createSwerveDrive(Units.feetToMeters(12.0),
                 new Pose2d(new Translation2d(), new Rotation2d(Math.toDegrees(0))));
             
         } catch(Exception e) {
@@ -53,7 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         navx = (AHRS)swerveDrive.getGyro().getIMU();
-        
+        swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
 
         AutoBuilder.configure(
             this::getPose, // Robot pose supplier
@@ -61,8 +67,8 @@ public class SwerveSubsystem extends SubsystemBase {
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(0.1, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(0.001, 0.0, 0.0) // Rotation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
             ),
             config, // The robot configuration
             () -> {
@@ -89,9 +95,9 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void driveSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
-        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5,
-            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5),
-            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .5,
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25,
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .25,
             true,
             false);
     }
@@ -105,15 +111,15 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void driveRobotOrientedSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
-        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5,
-            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .5),
-            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .5,
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25,
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .25,
             false,
             false);
     }
 
     public Pose2d getPose() {
-        return swerveDrive.getPose();
+        return swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition();
     }
 
     public void resetPose(Pose2d pose) {
@@ -122,6 +128,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return swerveDrive.getRobotVelocity();
+    }
+
+    public ChassisSpeeds getFieldRelativeSpeeds() {
+        return swerveDrive.getFieldVelocity();
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds) {
@@ -140,9 +150,23 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.zeroGyro();
     }
 
+    public double getSpeed() {
+        ChassisSpeeds fieldVelocity = getFieldRelativeSpeeds();
+        return Math.sqrt(fieldVelocity.vxMetersPerSecond * fieldVelocity.vxMetersPerSecond + fieldVelocity.vyMetersPerSecond * fieldVelocity.vyMetersPerSecond);
+    }
+
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("yaw", Math.toDegrees(swerveDrive.getGyroRotation3d().getAngle()));
+        LimelightHelpers.SetRobotOrientation("", swerveDrive.getPose().getRotation().getDegrees(), navx.getRate(), 0.0, 0.0, 0.0, 0.0);
+        if (LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("").tagCount > 0) {
+            swerveDrive.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose,
+                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
+        }
+        swerveDrive.updateOdometry();
+
+        
+        SmartDashboard.putData("Field", swerveDrive.field);
+        SmartDashboard.putNumber("yaw", navx.getYaw());
         SmartDashboard.putNumber("autobuilderpose", AutoBuilder.getCurrentPose().getRotation().getDegrees());
         SmartDashboard.putNumber("swerveDrive pose", swerveDrive.getPose().getRotation().getDegrees());
         SmartDashboard.putBoolean("robot oriented", getDriveMode());

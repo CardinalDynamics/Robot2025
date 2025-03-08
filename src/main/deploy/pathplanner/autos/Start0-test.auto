@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start1-Coral11"
+            "pathName": "Start0-Coral11"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score L4"
           }
         },
         {
@@ -17,9 +23,21 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "intake coral"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Source3-Coral10"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score L4"
           }
         },
         {
@@ -29,21 +47,33 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "intake coral"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Source3-Coral9"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Coral9-Source1"
+            "name": "score L4"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Source1-Coral8"
+            "pathName": "Coral9-Source3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intake coral"
           }
         }
       ]

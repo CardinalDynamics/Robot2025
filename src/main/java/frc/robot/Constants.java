@@ -22,5 +22,8 @@ public final class Constants {
     public static final int kElevator2ID = 12;
     public static final int kManipulatorID = 14;
     public static final int kLaserCANID = 15;
+    public static final int kFunnelID = 16;
+    public static final int kWinchID = 17;
+    public static final int kClimberWheelsID = 18;
   }
 }

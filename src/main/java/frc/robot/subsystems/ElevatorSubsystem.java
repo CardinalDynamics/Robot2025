@@ -51,7 +51,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         targetPosition = 0.0;
 
         controller.setGoal(targetPosition);
-        controller.setIZone(0);
+        controller.setTolerance(5.0);
     }
 
     public double getElevatorPosition() {
@@ -78,10 +78,16 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevator2.setVoltage(controller.calculate(getElevatorPosition()) + feedforward.calculate(0));
     }
 
+    public boolean atSetpoint() {
+        return controller.atSetpoint();
+    }
+
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getElevatorPosition());
         SmartDashboard.putNumber("Elevator Setpoint", controller.getSetpoint().position);
         SmartDashboard.putNumber("Elevator Goal", controller.getGoal().position);
+        SmartDashboard.putBoolean("atSetpoint", atSetpoint());
+        
         SmartDashboard.updateValues();
     }
 
