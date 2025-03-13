@@ -22,9 +22,11 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -62,7 +64,7 @@ public class RobotContainer {
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    NamedCommands.registerCommand("intake coral", new IntakeSlow(manipulator).withTimeout(.7));
+    NamedCommands.registerCommand("intake coral", new IntakeSlow(manipulator).andThen(Commands.runOnce(() -> manipulator.setManipulatorVoltage(0))));
     NamedCommands.registerCommand("score L4", new ScoreL4WithSensor(manipulator, elevator));
     swerver = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
     robotOriented = new Trigger(swerver::getDriveMode);
@@ -103,28 +105,50 @@ public class RobotContainer {
       11.0 * MathUtil.applyDeadband(m_operatorController.getLeftY(), .7)), climber));
     funnel.setDefaultCommand(Commands.run(() -> funnel.setFunnelVoltage(0), funnel));
 
-    swerver.setDefaultCommand(Commands.run(() -> swerver.drive(
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
-      () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
-    
-    robotOriented.whileTrue(Commands.run(() -> swerver.driveRobotOriented(
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
-      () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+      swerver.setDefaultCommand(Commands.run(() -> swerver.drive(
+        () -> MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+
+      m_driverController.leftBumper().whileTrue(Commands.run(() -> swerver.driveSlow(
+        () -> MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+
+      m_driverController.leftBumper().and(robotOriented).whileTrue(Commands.run(() -> swerver.driveRobotOrientedSlow(
+        () -> MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+
+      robotOriented.whileTrue(Commands.run(() -> swerver.driveRobotOriented(
+        () -> MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+    } else {
+      swerver.setDefaultCommand(Commands.run(() -> swerver.drive(
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+
+        m_driverController.leftBumper().whileTrue(Commands.run(() -> swerver.driveSlow(
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+
+        m_driverController.leftBumper().and(robotOriented).whileTrue(Commands.run(() -> swerver.driveRobotOrientedSlow(
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+
+        robotOriented.whileTrue(Commands.run(() -> swerver.driveRobotOriented(
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
+        () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
+        () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
+    }
 
     m_driverController.rightBumper().onTrue(Commands.runOnce(() -> swerver.toggleDriveMode()));
     m_driverController.a().onTrue(Commands.runOnce(() -> swerver.zeroGyro()));
-
-    m_driverController.leftBumper().whileTrue(Commands.run(() -> swerver.driveSlow(
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
-      () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
-
-    m_driverController.leftBumper().and(robotOriented).whileTrue(Commands.run(() -> swerver.driveRobotOrientedSlow(
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
-      () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
-      () -> -.9 * MathUtil.applyDeadband(m_driverController.getRightX(), .1)), swerver));
 
     // m_driverController.y().whileTrue(AutoBuilder.followPath(path));
 

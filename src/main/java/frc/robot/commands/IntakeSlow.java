@@ -13,7 +13,7 @@ public class IntakeSlow extends Command {
     }
 
     public void initialize() {
-        manipulator.setManipulatorVoltage(2.0);
+        manipulator.setManipulatorVoltage(1.0);
     }
 
     public void end() {

@@ -14,8 +14,10 @@ import com.studica.frc.AHRS;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
@@ -95,9 +97,9 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void driveSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
-        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25,
-            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25),
-            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .25,
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1,
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .1,
             true,
             false);
     }
@@ -111,9 +113,9 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void driveRobotOrientedSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
-        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25,
-            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .25),
-            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .25,
+        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1,
+            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1),
+            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .1,
             false,
             false);
     }
@@ -157,7 +159,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        LimelightHelpers.SetRobotOrientation("", swerveDrive.getPose().getRotation().getDegrees(), navx.getRate(), 0.0, 0.0, 0.0, 0.0);
+        
+        LimelightHelpers.SetRobotOrientation("", swerveDrive.getPose().getRotation().getDegrees(), 0, 0.0, 0.0, 0.0, 0.0);
+
         if (LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("").tagCount > 0) {
             swerveDrive.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose,
                 LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
