@@ -33,7 +33,11 @@ public class ManipulatorSubsystem extends SubsystemBase{
     }
 
     public double sensorMeasurement() {
-        return sensor.getMeasurement().distance_mm;
+        var sensorMeasurementManipulator = sensor.getMeasurement();
+        if (sensorMeasurementManipulator != null) {
+            return sensorMeasurementManipulator.distance_mm;
+        }
+        return 0;
     }
 
     public boolean hasCoral() {

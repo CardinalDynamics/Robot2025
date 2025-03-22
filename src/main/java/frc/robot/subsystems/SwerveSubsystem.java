@@ -149,8 +149,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic() {
         
         LimelightHelpers.SetRobotOrientation("", swerveDrive.getPose().getRotation().getDegrees(), 0, 0.0, 0.0, 0.0, 0.0);
-
-        if (LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("").tagCount > 0) {
+        var mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
+        if (mt2 != null && mt2.tagCount > 0) {
             swerveDrive.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose,
                 LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
         }

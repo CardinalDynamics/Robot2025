@@ -31,7 +31,11 @@ public class FunnelSubsystem extends SubsystemBase{
     }
 
     public double sensorMeasurementFunnel() {
-        return funnelSensor.getMeasurement().distance_mm;
+        var sensorMeasurementFunnel = funnelSensor.getMeasurement();
+        if (sensorMeasurementFunnel != null) {
+            return sensorMeasurementFunnel.distance_mm;
+        }
+        return 0;
     }
 
     public boolean elevatorBlocked() {

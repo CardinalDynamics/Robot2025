@@ -93,6 +93,7 @@ public class RobotContainer {
     m_autoChooser.addOption("scorel4-test", AutoBuilder.buildAuto("L4Score-test"));
     m_autoChooser.addOption("Straight", AutoBuilder.buildAuto("Straight"));
     m_autoChooser.addOption("none", Commands.waitSeconds(0));
+    m_autoChooser.addOption("testtests", AutoBuilder.buildAuto("Test"));
     SmartDashboard.putData("chooser", m_autoChooser);
 
     alignmentCommandFactory = new AutoAlign(swerver);
