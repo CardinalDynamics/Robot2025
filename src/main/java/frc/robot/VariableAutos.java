@@ -16,26 +16,26 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class VariableAutos {
 
-    public enum FieldBranch{
-        A(BranchSide.LEFT, ReefSide.ONE),
-        B(BranchSide.RIGHT, ReefSide.ONE),
-        C(BranchSide.LEFT, ReefSide.TWO),
-        D(BranchSide.RIGHT, ReefSide.TWO),
-        E(BranchSide.LEFT, ReefSide.THREE),
-        F(BranchSide.RIGHT, ReefSide.THREE),
-        G(BranchSide.LEFT, ReefSide.FOUR),
-        H(BranchSide.RIGHT, ReefSide.FOUR),
-        I(BranchSide.LEFT, ReefSide.FIVE),
-        J(BranchSide.RIGHT, ReefSide.FIVE),
-        K(BranchSide.LEFT, ReefSide.SIX),
-        L(BranchSide.RIGHT, ReefSide.SIX);
+    // public enum FieldBranch{
+    //     A(BranchSide.LEFT, ReefSide.ONE),
+    //     B(BranchSide.RIGHT, ReefSide.ONE),
+    //     C(BranchSide.LEFT, ReefSide.TWO),
+    //     D(BranchSide.RIGHT, ReefSide.TWO),
+    //     E(BranchSide.LEFT, ReefSide.THREE),
+    //     F(BranchSide.RIGHT, ReefSide.THREE),
+    //     G(BranchSide.LEFT, ReefSide.FOUR),
+    //     H(BranchSide.RIGHT, ReefSide.FOUR),
+    //     I(BranchSide.LEFT, ReefSide.FIVE),
+    //     J(BranchSide.RIGHT, ReefSide.FIVE),
+    //     K(BranchSide.LEFT, ReefSide.SIX),
+    //     L(BranchSide.RIGHT, ReefSide.SIX);
 
-        public SimpleBranch simpleBranchInfo;
+    //     public SimpleBranch simpleBranchInfo;
 
-        private FieldBranch(BranchSide branchSide, ReefSide reefSide) {
-            this.simpleBranchInfo = new SimpleBranch(branchSide, reefSide);
-        }
-    }
+    //     private FieldBranch(BranchSide branchSide, ReefSide reefSide) {
+    //         this.simpleBranchInfo = new SimpleBranch(branchSide, reefSide);
+    //     }
+    // }
 
     public record SimpleBranch(BranchSide branchSide, ReefSide reefSide) {
         public SimpleBranch mirror(){
@@ -45,8 +45,9 @@ public class VariableAutos {
     }
 
     public enum BranchSide{
-        LEFT(new Translation2d(0.1527 - 0.00635, .5)),
-        RIGHT(new Translation2d(0.1738, .5));
+        LEFT(new Translation2d(0.16, .5)),
+        RIGHT(new Translation2d(0.16, .5)),
+        CENTER(new Translation2d(0.0, .5));
 
         public Translation2d tagOffset;
         private BranchSide(Translation2d offsets) {

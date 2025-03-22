@@ -36,7 +36,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 public class AutoAlign {
     
-    private final SwerveSubsystem swerve;
+    private SwerveSubsystem swerve;
 
     public static ArrayList<Pose2d> blueReefTagPoses = new ArrayList<>();
     public static ArrayList<Pose2d> redReefTagPoses = new ArrayList<>();
@@ -90,7 +90,6 @@ public class AutoAlign {
         }, Set.of());
     }
 
-
     public Command generateCommand(final ReefSide reefTag, BranchSide side) {
         return Commands.defer(() -> {
             var branch = getBranchFromTag(reefTag.getCurrent(), side);
@@ -117,7 +116,7 @@ public class AutoAlign {
 
         PathPlannerPath path = new PathPlannerPath(
             waypoints, 
-            new PathConstraints(1.5, 3.0, 540.0, 7.20),
+            new PathConstraints(3.0, 1.0, 540.0, 220.0),
             new IdealStartingState(getVelocityMagnitude(swerve.getFieldRelativeSpeeds()), swerve.getPose().getRotation()), 
             new GoalEndState(0.0, waypoint.getRotation())
         );
@@ -130,7 +129,6 @@ public class AutoAlign {
             Commands.print("end position PID loop")
         );
     }
-    
 
     /**
      * 
@@ -189,7 +187,19 @@ public class AutoAlign {
             tag.getRotation()
         );
     }
-    
+
+    private static Pose2d getSideFromTag(Pose2d tag) {
+        var translation = tag.getTranslation().plus(
+            new Translation2d(
+                0,
+                .55
+            ).rotateBy(tag.getRotation()));
+        return new Pose2d(
+            translation.getX(),
+            translation.getY(),
+            tag.getRotation()
+        );
+    }
     /**
      * get closest reef april tag pose to given position
      * 
@@ -212,5 +222,7 @@ public class AutoAlign {
         return pose.nearest(reefPoseList);
 
     }
+
+
 
 }

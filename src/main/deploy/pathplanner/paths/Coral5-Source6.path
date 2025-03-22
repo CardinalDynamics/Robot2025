@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 3.9679303278688525,
-        "y": 2.7962602459016397
+        "y": 2.7722848360655736
       },
       "prevControl": null,
       "nextControl": {
         "x": 4.498981358563496,
-        "y": 3.2636048219753166
+        "y": 3.2396294121392506
       },
       "isLocked": false,
       "linkedName": "Coral5"
     },
     {
       "anchor": {
-        "x": 1.5943647540983608,
-        "y": 0.7103995901639337
+        "x": 1.6380000000000001,
+        "y": 0.7489999999999998
       },
       "prevControl": {
-        "x": 1.4020026399188086,
-        "y": 0.550722362518997
+        "x": 1.445637885820448,
+        "y": 0.5893227723550629
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,9 +34,9 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 2.6,
+    "maxAcceleration": 1.5,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAngularAcceleration": 220.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },

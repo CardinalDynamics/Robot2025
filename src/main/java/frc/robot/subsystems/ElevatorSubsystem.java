@@ -43,7 +43,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevator1.configure(elevator1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         elevator2.configure(elevator2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        controller = new ProfiledPIDController(0.025, 0.0, 0.0, new Constraints(6000.0, 6000.0));
+        // .025
+        controller = new ProfiledPIDController(0.01, 0.0, 0.0, new Constraints(14000.0, 14000.0));
 
         encoder = new Encoder(0, 1, false);
         encoder.reset();
@@ -51,7 +52,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         targetPosition = 0.0;
 
         controller.setGoal(targetPosition);
-        controller.setTolerance(5.0);
+        controller.setTolerance(30.0);
     }
 
     public double getElevatorPosition() {
@@ -78,17 +79,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevator2.setVoltage(controller.calculate(getElevatorPosition()) + feedforward.calculate(0));
     }
 
-    public boolean atSetpoint() {
-        return controller.atSetpoint();
+    public boolean atGoal() {
+        return controller.atGoal();
     }
 
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getElevatorPosition());
         SmartDashboard.putNumber("Elevator Setpoint", controller.getSetpoint().position);
         SmartDashboard.putNumber("Elevator Goal", controller.getGoal().position);
-        SmartDashboard.putBoolean("atSetpoint", atSetpoint());
-        
-        SmartDashboard.updateValues();
+        SmartDashboard.putBoolean("atSetpoint", atGoal());
     }
 
 }

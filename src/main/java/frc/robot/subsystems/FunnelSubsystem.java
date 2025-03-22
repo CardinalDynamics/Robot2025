@@ -5,22 +5,42 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import au.grapplerobotics.LaserCan;
+
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDs;
 
 public class FunnelSubsystem extends SubsystemBase{
     SparkMax funnel;
     SparkMaxConfig funnelConfig = new SparkMaxConfig();
+    LaserCan funnelSensor;
 
     public FunnelSubsystem() {
         funnel = new SparkMax(CANIDs.kFunnelID, MotorType.kBrushed);
         funnelConfig.inverted(false).idleMode(IdleMode.kBrake);
         funnel.configure(funnelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        funnelSensor = new LaserCan(CANIDs.kLaserCAN2ID);
     }
 
     public void setFunnelVoltage(double volts) {
         funnel.setVoltage(volts);
+    }
+
+    public double sensorMeasurementFunnel() {
+        return funnelSensor.getMeasurement().distance_mm;
+    }
+
+    public boolean elevatorBlocked() {
+        return sensorMeasurementFunnel() < 100;
+    }
+
+    public void periodic() {
+        SmartDashboard.putBoolean("elevatorBlocked", elevatorBlocked());
+        SmartDashboard.putNumber("lasercan", sensorMeasurementFunnel());
+        super.periodic();
     }
 }

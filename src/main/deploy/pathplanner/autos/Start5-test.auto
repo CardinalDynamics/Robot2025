@@ -23,57 +23,28 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "intake coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Source6-Coral5"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "score L4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Coral5-Source6"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intake coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Source6-Coral6"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake coral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Source6-Coral5"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
             "name": "score L4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Coral6-Source6"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intake coral"
           }
         }
       ]

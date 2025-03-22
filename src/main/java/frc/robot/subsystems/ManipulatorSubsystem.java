@@ -25,7 +25,7 @@ public class ManipulatorSubsystem extends SubsystemBase{
         manipulator = new SparkMax(CANIDs.kManipulatorID, MotorType.kBrushless);
         manipulatorconfig.inverted(false).idleMode(IdleMode.kBrake);
         manipulator.configure(manipulatorconfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        sensor = new LaserCan(CANIDs.kLaserCANID);
+        sensor = new LaserCan(CANIDs.kLaserCAN1ID);
     }
 
     public void setManipulatorVoltage(double volts) {

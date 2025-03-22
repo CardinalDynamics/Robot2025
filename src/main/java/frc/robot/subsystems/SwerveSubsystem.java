@@ -10,7 +10,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.studica.frc.AHRS;
-
+// drive p0.0020645
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -41,12 +41,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.POSE;
         
-        int[] validIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22};
+        int[] validIDs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22};
         LimelightHelpers.SetFiducialIDFiltersOverride("limelight", validIDs);
 
         // Make a swerve drive from json files
         try {
-            swerveDrive = new SwerveParser(directory).createSwerveDrive(Units.feetToMeters(12.0),
+            swerveDrive = new SwerveParser(directory).createSwerveDrive(Units.feetToMeters(13.0),
                 new Pose2d(new Translation2d(), new Rotation2d(Math.toDegrees(0))));
             
         } catch(Exception e) {
@@ -69,7 +69,7 @@ public class SwerveSubsystem extends SubsystemBase {
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, .0), // Translation PID constants
                     new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
             ),
             config, // The robot configuration
@@ -96,23 +96,7 @@ public class SwerveSubsystem extends SubsystemBase {
             false);
     }
 
-    public void driveSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
-        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1,
-            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1),
-            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .1,
-            true,
-            false);
-    }
-
     public void driveRobotOriented(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
-        swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()),
-            angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(),
-            false,
-            false);
-    }
-
-    public void driveRobotOrientedSlow(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularVelocity) {
         swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1,
             translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * .1),
             angularVelocity.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity() * .1,
@@ -152,6 +136,10 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveDrive.zeroGyro();
     }
 
+    public void lockWheels() {
+        swerveDrive.lockPose();
+    }
+
     public double getSpeed() {
         ChassisSpeeds fieldVelocity = getFieldRelativeSpeeds();
         return Math.sqrt(fieldVelocity.vxMetersPerSecond * fieldVelocity.vxMetersPerSecond + fieldVelocity.vyMetersPerSecond * fieldVelocity.vyMetersPerSecond);
@@ -166,6 +154,7 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose,
                 LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
         }
+
         swerveDrive.updateOdometry();
 
         
@@ -173,7 +162,9 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("yaw", navx.getYaw());
         SmartDashboard.putNumber("autobuilderpose", AutoBuilder.getCurrentPose().getRotation().getDegrees());
         SmartDashboard.putNumber("swerveDrive pose", swerveDrive.getPose().getRotation().getDegrees());
-        SmartDashboard.putBoolean("robot oriented", getDriveMode());
+        SmartDashboard.putBoolean("robot oriented", isRobotOriented);
+        SmartDashboard.putNumber("pose x", swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition().getX());
+        SmartDashboard.putNumber("pose y", swerveDrive.swerveDrivePoseEstimator.getEstimatedPosition().getY());
         // TODO Auto-generated method stub
         super.periodic();
     }
