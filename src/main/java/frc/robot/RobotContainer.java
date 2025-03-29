@@ -7,8 +7,9 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.VariableAutos.BranchSide;
 import frc.robot.commands.IntakeCoral;
-import frc.robot.commands.IntakeSlow;
+import frc.robot.commands.IntakeAuto;
 import frc.robot.commands.ScoreL4WithSensor;
+import frc.robot.commands.ScoreSecondL4;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.FunnelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -73,9 +74,10 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    NamedCommands.registerCommand("intake coral", new IntakeCoral(manipulator, funnel, leds).withTimeout(4)
+    NamedCommands.registerCommand("intake coral", new IntakeAuto(manipulator, funnel).withTimeout(4)
         .andThen(Commands.runOnce(() -> manipulator.setManipulatorVoltage(0))));
     NamedCommands.registerCommand("score L4", new ScoreL4WithSensor(manipulator, elevator));
+    NamedCommands.registerCommand("second L4", new ScoreSecondL4(manipulator, elevator));
     swerver = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
     // Load path
     loadPaths();
