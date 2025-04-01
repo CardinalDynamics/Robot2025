@@ -185,6 +185,9 @@ public class RobotContainer {
 
     m_operatorController.a().onTrue(Commands.runOnce(() -> elevator.setTargetPosition(10.0)));
     m_operatorController.a().whileTrue(Commands.run(() -> elevator.usePIDOutput(), elevator));
+    
+    m_operatorController.povLeft().onTrue(Commands.runOnce(() -> elevator.setTargetPosition(1200.0)));
+    m_operatorController.povLeft().whileTrue(Commands.run(() -> elevator.usePIDOutput(), elevator));
 
     m_operatorController.povDown().onTrue(new IntakeCoral(manipulator, funnel, leds));
     // m_operatorController.leftBumper().whileTrue(Commands.run(() ->
@@ -192,9 +195,7 @@ public class RobotContainer {
     // climber.setClimberVoltage(0), climber));
     m_operatorController.povUp().whileTrue(Commands.run(() -> manipulator.setManipulatorVoltage(10), manipulator));
 
-    m_driverController.povUp().whileTrue(Commands.run(() -> swerver.driveRobotRelative(new ChassisSpeeds(2, 0, 0)), swerver));
-    m_driverController.povDown().whileTrue(Commands.run(() -> swerver.driveRobotRelative(new ChassisSpeeds(1, 0, 0)), swerver));
-    m_driverController.povRight().whileTrue(Commands.run(() -> swerver.driveRobotRelative(new ChassisSpeeds(3, 0, 0)), swerver));
+    m_driverController.povDown().whileTrue(swerver.sysIdDriveMotorCommand());
 
     hasCoral.onTrue(Commands.runOnce(() -> leds.setCoralState(), leds)).onFalse(Commands.runOnce(() -> leds.setDefaultLights(), leds));
     endGame.whileTrue(leds.runPattern());

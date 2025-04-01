@@ -18,16 +18,22 @@ public class FunnelSubsystem extends SubsystemBase{
     SparkMax funnel;
     SparkMaxConfig funnelConfig = new SparkMaxConfig();
     LaserCan funnelSensor;
+    SparkMax roller;
+    SparkMaxConfig rollerConfig = new SparkMaxConfig();
 
     public FunnelSubsystem() {
         funnel = new SparkMax(CANIDs.kFunnelID, MotorType.kBrushed);
         funnelConfig.inverted(false).idleMode(IdleMode.kBrake);
         funnel.configure(funnelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         funnelSensor = new LaserCan(CANIDs.kLaserCAN2ID);
+        roller = new SparkMax(CANIDs.kRollerID, MotorType.kBrushless);
+        rollerConfig.inverted(true).idleMode(IdleMode.kCoast);
+        roller.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setFunnelVoltage(double volts) {
         funnel.setVoltage(volts);
+        roller.setVoltage(volts * .5);
     }
 
     public double sensorMeasurementFunnel() {

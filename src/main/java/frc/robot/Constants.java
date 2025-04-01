@@ -25,5 +25,6 @@ public final class Constants {
     public static final int kFunnelID = 16;
     public static final int kClimberWheelsID = 18;
     public static final int kLaserCAN2ID = 19;
+    public static final int kRollerID = 20;
   }
 }

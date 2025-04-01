@@ -188,18 +188,6 @@ public class AutoAlign {
         );
     }
 
-    private static Pose2d getSideFromTag(Pose2d tag) {
-        var translation = tag.getTranslation().plus(
-            new Translation2d(
-                0,
-                .55
-            ).rotateBy(tag.getRotation()));
-        return new Pose2d(
-            translation.getX(),
-            translation.getY(),
-            tag.getRotation()
-        );
-    }
     /**
      * get closest reef april tag pose to given position
      * 
