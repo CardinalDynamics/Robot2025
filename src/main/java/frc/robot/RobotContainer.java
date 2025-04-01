@@ -124,7 +124,7 @@ public class RobotContainer {
     manipulator.setDefaultCommand(Commands.run(() -> manipulator.setManipulatorVoltage(0), manipulator));
     funnel.setDefaultCommand(Commands.run(() -> funnel.setFunnelVoltage(0), funnel));
 
-    if (DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red) {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
       robotOriented.whileTrue(Commands.run(() -> swerver.driveRobotOriented(
         () -> -MathUtil.applyDeadband(m_driverController.getLeftY(), .1),
         () -> -MathUtil.applyDeadband(m_driverController.getLeftX(), .1),
