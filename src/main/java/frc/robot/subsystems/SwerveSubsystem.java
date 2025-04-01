@@ -66,7 +66,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         navx = (AHRS)swerveDrive.getGyro().getIMU();
         swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
-        SwerveDrive.replaceSwerveModuleFeedforward();
+        // SwerveDrive.replaceSwerveModuleFeedforward();
 
         AutoBuilder.configure(
             this::getPose, // Robot pose supplier
