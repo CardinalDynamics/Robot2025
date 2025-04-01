@@ -197,6 +197,10 @@ public class RobotContainer {
 
     m_driverController.povDown().whileTrue(swerver.sysIdDriveMotorCommand());
 
+    m_driverController.rightTrigger()
+    .whileTrue(Commands.run(() -> manipulator.setManipulatorVoltage(4), manipulator));
+    m_driverController.rightTrigger().whileTrue(Commands.run(() -> funnel.setFunnelVoltage(-4.0), funnel));
+
     hasCoral.onTrue(Commands.runOnce(() -> leds.setCoralState(), leds)).onFalse(Commands.runOnce(() -> leds.setDefaultLights(), leds));
     endGame.whileTrue(leds.runPattern());
   }
