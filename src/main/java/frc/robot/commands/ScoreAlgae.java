@@ -9,11 +9,11 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ManipulatorSubsystem;
 
-public class ScoreL4WithSensor extends SequentialCommandGroup {
+public class ScoreAlgae extends SequentialCommandGroup {
     ManipulatorSubsystem manipulator;
     ElevatorSubsystem elevator;
 
-    public ScoreL4WithSensor(ManipulatorSubsystem inManipulator, ElevatorSubsystem inElevatorSubsystem) {
+    public ScoreAlgae(ManipulatorSubsystem inManipulator, ElevatorSubsystem inElevatorSubsystem) {
         manipulator = inManipulator;
         elevator = inElevatorSubsystem;
         addCommands(
@@ -23,7 +23,9 @@ public class ScoreL4WithSensor extends SequentialCommandGroup {
                 Commands.run(() -> elevator.usePIDOutput(), elevator).withTimeout(1.5),
                 new SequentialCommandGroup(
                     Commands.waitSeconds(1.3),
-                    new ShootCoral(inManipulator).andThen(Commands.waitSeconds(0.1)),
+                    Commands.runOnce(() -> manipulator.setManipulatorVoltage(10), manipulator),
+                    Commands.waitSeconds(.3),
+                    Commands.runOnce(() -> manipulator.setManipulatorVoltage(0), manipulator),
                     Commands.print("shot")
                 )
             ),
@@ -31,7 +33,8 @@ public class ScoreL4WithSensor extends SequentialCommandGroup {
             Commands.runOnce(() -> elevator.setTargetPosition(5), elevator),
             Commands.print("elevator"),
             Commands.run(() -> elevator.usePIDOutput(), elevator).withTimeout(1.2).finallyDo(() -> System.out.println("enddd")),
-            Commands.print("end")
+            Commands.print("end"),
+            Commands.runOnce(() -> manipulator.setManipulatorVoltage(0), manipulator)
         );
         addRequirements(elevator);
     }

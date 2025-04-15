@@ -44,7 +44,32 @@
         {
           "type": "named",
           "data": {
-            "name": "second L4"
+            "name": "score L4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Coral5-Source6"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake coral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Source6-Coral6"
+                }
+              }
+            ]
           }
         }
       ]

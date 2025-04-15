@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.VariableAutos.BranchSide;
 import frc.robot.commands.IntakeCoral;
+import frc.robot.commands.ScoreAlgae;
 import frc.robot.commands.IntakeAuto;
 import frc.robot.commands.ScoreL4WithSensor;
 import frc.robot.commands.ScoreSecondL4;
@@ -78,6 +79,9 @@ public class RobotContainer {
         .andThen(Commands.runOnce(() -> manipulator.setManipulatorVoltage(0))));
     NamedCommands.registerCommand("score L4", new ScoreL4WithSensor(manipulator, elevator));
     NamedCommands.registerCommand("second L4", new ScoreSecondL4(manipulator, elevator));
+    NamedCommands.registerCommand("grab algae", Commands.runOnce(() -> manipulator.setManipulatorVoltage(-1), manipulator));
+    NamedCommands.registerCommand("score algae", new ScoreAlgae(manipulator, elevator));
+    NamedCommands.registerCommand("fast algae", Commands.runOnce(() -> manipulator.setManipulatorVoltage(-4), manipulator));
     swerver = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
     // Load path
     loadPaths();
@@ -96,6 +100,7 @@ public class RobotContainer {
     m_autoChooser.addOption("Straight", AutoBuilder.buildAuto("Straight"));
     m_autoChooser.addOption("none", Commands.waitSeconds(0));
     m_autoChooser.addOption("testtests", AutoBuilder.buildAuto("Test"));
+    m_autoChooser.addOption("middle with algae", AutoBuilder.buildAuto("Algae"));
     SmartDashboard.putData("chooser", m_autoChooser);
 
     alignmentCommandFactory = new AutoAlign(swerver);

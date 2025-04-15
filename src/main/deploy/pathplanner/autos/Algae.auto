@@ -11,9 +11,39 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "score L4"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "Coral1-Algae4"
+            "pathName": "Coral1-meh"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "fast algae"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "meh-Algae4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "grab algae"
           }
         },
         {
@@ -23,21 +53,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "score algae"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Net1-Algae5"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Algae5-Net1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Net1-off"
           }
         }
       ]
